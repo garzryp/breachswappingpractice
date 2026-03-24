@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tick-Perfect Swap Trainer</title>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; }
+        #box { width: 300px; height: 200px; border: 2px solid #444; margin: 50px auto; padding: 20px; border-radius: 10px; }
+        .key { display: inline-block; width: 60px; height: 60px; line-height: 60px; border: 2px solid #555; margin: 10px; font-size: 24px; border-radius: 5px; }
+        .active { background: #ffcc00; color: black; border-color: white; }
+        .success { color: #00ff00; }
+        .fail { color: #ff4444; }
+        #stats { margin-top: 20px; font-size: 0.9em; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <h1>Breach Swap Trainer</h1>
+    <p>Press <strong>1</strong> then <strong>2</strong> within the same 50ms tick.</p>
+
+    <div id="box">
+        <div id="key1" class="key">1</div>
+        <div id="key2" class="key">2</div>
+        <h2 id="feedback">READY</h2>
+    </div>
+
+    <div id="stats">
+        Difference: <span id="ms-diff">0</span>ms<br>
+        Result: <span id="result-text">-</span>
+    </div>
+
+    <script>
+        let lastKey1Time = 0;
+        const TICK_WINDOW = 50; // Minecraft tick length
+
+        window.addEventListener('keydown', (e) => {
+            const now = performance.now();
+
+            if (e.key === '1') {
+                lastKey1Time = now;
+                resetUI();
+                document.getElementById('key1').classList.add('active');
+            }
+
+            if (e.key === '2' && lastKey1Time !== 0) {
+                const diff = now - lastKey1Time;
+                document.getElementById('key2').classList.add('active');
+                document.getElementById('ms-diff').innerText = diff.toFixed(2);
+                
+                const feedback = document.getElementById('feedback');
+                const resultText = document.getElementById('result-text');
+
+                if (diff <= TICK_WINDOW) {
+                    feedback.innerText = "TICK PERFECT!";
+                    feedback.className = "success";
+                    resultText.innerText = "SUCCESS (Within 1 Tick)";
+                } else {
+                    feedback.innerText = "TOO SLOW";
+                    feedback.className = "fail";
+                    resultText.innerText = `FAILED (Took ${Math.ceil(diff / TICK_WINDOW)} ticks)`;
+                }
+                
+                lastKey1Time = 0; // Reset for next attempt
+            }
+        });
+
+        function resetUI() {
+            document.getElementById('key1').classList.remove('active');
+            document.getElementById('key2').classList.remove('active');
+            document.getElementById('feedback').innerText = "WAITING FOR 2...";
+            document.getElementById('feedback').className = "";
+        }
+    </script>
+</body>
+</html>
